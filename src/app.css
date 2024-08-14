@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-accent: 255 122 1;
+  --color-foreground: 231 233 234;
+  --color-background: 0 0 0;
+  --color-faint: 113 118 123;
+  --color-ui: 47 51 54;
+  --color-highlight: 22 24 28;
+  --color-highlightextra: 29 31 35;
+  --color-circle: 23 173 17;
+  --color-cross: 166 27 12;
+
+  --font-family: 'Helvetica Neue', Roboto, -apple-system, BlinkMacSystemFont;
+}
+
+/* @media (prefers-color-scheme: dark) {
+  :root {
+    --color-accent: 255 122 1;
+    --color-foreground: 15 20 25;
+    --color-background: 255 255 255;
+    --color-faint: 83 100 113;
+    --color-ui: 239 242 243;
+    --color-highlight: 247 249 249;
+    --color-highlightextra: 29 31 35;
+  }
+} */
