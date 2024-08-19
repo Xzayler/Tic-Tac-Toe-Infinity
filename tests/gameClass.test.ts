@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import Game from '../src/lib/Game';
 
-describe('Custom Queue Class', () => {
+describe('Tic-Tac-Toe Game Class', () => {
   let g: Game;
 
   beforeEach(() => {
