@@ -10,10 +10,11 @@ export default class Game {
   private currPlayer: Player = 'x';
   public isGameOver: boolean = false;
   private toRemove: Queue<GridIndex | null> = new Queue(9);
-  private nextToRemove: GridIndex | null = null;
+  private removed: GridIndex | null = null;
 
   constructor() {
     // Fill it with nulls to delay when real cells start being cleared
+    this.toRemove.enqueue(null);
     this.toRemove.enqueue(null);
     this.toRemove.enqueue(null);
     this.toRemove.enqueue(null);
@@ -33,11 +34,11 @@ export default class Game {
     return this.cells[index];
   }
 
-  private clearCell(next: GridIndex) {
-    if (this.nextToRemove !== null) {
-      this.cells[this.nextToRemove] = null;
+  private clearCell(next: GridIndex | null) {
+    if (next !== null) {
+      this.cells[next] = null;
     }
-    this.nextToRemove = next;
+    this.removed = next;
   }
 
   private isWinningMove(index: GridIndex): boolean {
@@ -75,11 +76,12 @@ export default class Game {
   }
 
   public move(index: GridIndex): boolean {
-    if (this.cells[index] !== null) return false;
+    if (this.cells[index] !== null || this.isGameOver) return false;
     this.cells[index] = this.currPlayer;
     this.turns++;
     if (this.isWinningMove(index)) {
       this.isGameOver = true;
+      this.removed = null;
       return true;
     }
 
@@ -100,7 +102,7 @@ export default class Game {
     this.cells = new Array(9).fill(null);
   }
 
-  public getNextToRemove() {
-    return this.nextToRemove;
+  public getRemoved() {
+    return this.removed;
   }
 }
