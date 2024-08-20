@@ -1,7 +1,7 @@
 import wsAdapter from 'crossws/adapters/node';
 import { defineHooks } from 'crossws';
 import { Peer } from 'crossws';
-import Game, { type Player } from '~/lib/Game';
+import Game, { GridIndex, type Player } from '~/lib/Game';
 
 // These types are here mainly for to see what kind of requests and responses the app uses
 
@@ -18,6 +18,20 @@ export type JoinResponse = {
 
 type StartResponse = {
   name: 'start';
+};
+
+export type MoveRequest = {
+  name: 'move';
+  cell: GridIndex;
+};
+
+export type MoveResponse = {
+  name: 'move';
+  cell: GridIndex;
+  player: Player;
+  valid: boolean;
+  newState: MatchState;
+  toRemove: GridIndex | null;
 };
 
 export type ChatRequest = {
@@ -134,6 +148,47 @@ function handleChatMessage(peer: Peer, req: ChatRequest) {
   peer.send(resp);
 }
 
+function handleMoveResquest(peer: Peer, req: MoveRequest) {
+  const matchId = joinedPlayers.get(peer.id);
+  // return if player is not in a match
+  if (!matchId) return;
+
+  // These two checks should always pass if everything was
+  const match = matches.get(matchId);
+  if (!match || match.matchingStatus !== 'ongoing') return;
+  const playerSymbol = match.o === peer ? 'o' : match.x === peer ? 'x' : null;
+  if (!playerSymbol) return;
+
+  const game = match.game;
+
+  // Check if it's the peer's turn
+  if (game.getCurrPlayer() !== playerSymbol || game.isGameOver) return;
+
+  let res: MoveResponse;
+  // If the move was valid
+  if (game.move(req.cell)) {
+    res = {
+      name: 'move',
+      cell: req.cell,
+      valid: true,
+      player: playerSymbol,
+      newState: game.isGameOver ? `${playerSymbol}w` : 'ongoing',
+      toRemove: game.getRemoved(),
+    };
+  } else {
+    res = {
+      name: 'move',
+      cell: req.cell,
+      valid: false,
+      player: playerSymbol,
+      newState: 'ongoing',
+      toRemove: null,
+    };
+  }
+  peer.publish(matchId.toString(), res);
+  peer.send(res);
+}
+
 const hooks = defineHooks({
   open(peer) {
     console.log('[ws] open', peer);
@@ -149,6 +204,10 @@ const hooks = defineHooks({
 
       case 'chat':
         handleChatMessage(peer, req);
+        break;
+
+      case 'move':
+        handleMoveResquest(peer, req);
         break;
 
       default:

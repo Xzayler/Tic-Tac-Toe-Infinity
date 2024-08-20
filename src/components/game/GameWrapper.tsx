@@ -1,5 +1,5 @@
 import { useGameContext } from '../contexts/GameProvider';
-import { Switch, Match } from 'solid-js';
+import { Switch, Match, createEffect } from 'solid-js';
 import Game from './Game';
 
 export default function GameWrapper() {
@@ -18,7 +18,7 @@ export default function GameWrapper() {
 
   return (
     <div class="flex flex-col justify-center items-center gap-2">
-      <Switch>
+      <Switch fallback={<Game />}>
         <Match when={gameState.matchState === null}>
           <button onclick={createMatch}>Create</button>
           <div>
@@ -30,9 +30,6 @@ export default function GameWrapper() {
           <p>{`Id: ${gameState.id}`}</p>
           <div>Searching for players</div>
           {/* TODO: Add option to cancel the search */}
-        </Match>
-        <Match when={gameState.matchState === 'ongoing'}>
-          <div>{/* <Game /> */}LOADING</div>
         </Match>
       </Switch>
     </div>

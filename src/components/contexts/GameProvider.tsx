@@ -8,9 +8,15 @@ import {
   onMount,
   Show,
 } from 'solid-js';
-import { createStore, SetStoreFunction } from 'solid-js/store';
+import { createStore } from 'solid-js/store';
 import type { Player, GridIndex, CellValue } from '~/lib/Game';
-import type { MatchState, JoinResponse, JoinRequest } from '~/server/ws';
+import type {
+  MatchState,
+  JoinResponse,
+  JoinRequest,
+  MoveRequest,
+  MoveResponse,
+} from '~/server/ws';
 
 type GameState = {
   id: number;
@@ -94,15 +100,29 @@ export default function GameProvider(props: { children: JSXElement }) {
     }
   }
 
+  function handleMoveResp(resp: MoveResponse) {
+    const { valid, cell, newState, player, toRemove } = resp;
+    if (valid) {
+      setGameState('cells', cell, player);
+      setGameState('matchState', newState);
+      if (toRemove !== null) {
+        setGameState('cells', toRemove, null);
+      }
+      setGameState('activePlayer', player === 'x' ? 'o' : 'x');
+    }
+  }
+
   function onMessage(event: MessageEvent) {
     const data = JSON.parse(event.data);
-    console.log(data);
     switch (data.name) {
       case 'join':
         handleJoinResp(data);
         break;
       case 'start':
         setGameState('matchState', 'ongoing');
+        break;
+      case 'move':
+        handleMoveResp(data);
         break;
 
       default:
@@ -137,7 +157,11 @@ export default function GameProvider(props: { children: JSXElement }) {
   }
 
   function attemptMove(index: GridIndex) {
-    // Send a move req to server
+    const req: MoveRequest = {
+      name: 'move',
+      cell: index,
+    };
+    wsContext.send(JSON.stringify(req));
   }
 
   const contextVal = {
