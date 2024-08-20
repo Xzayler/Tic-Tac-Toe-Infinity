@@ -90,7 +90,7 @@ describe('Tic-Tac-Toe Game Class', () => {
   });
 
   it('Should start clearing cells in the 6th turn', () => {
-    expect(g.getNextToRemove()).toBe(null);
+    expect(g.getRemoved()).toBe(null);
     g.move(0);
     expect(g.getCell(0)).toBe('x');
     g.move(1);
@@ -102,18 +102,18 @@ describe('Tic-Tac-Toe Game Class', () => {
     g.move(8);
     g.move(5);
 
-    expect(g.getNextToRemove()).toBe(0);
     g.move(7);
+    expect(g.getRemoved()).toBe(0);
     expect(g.getCell(0)).toBe(null);
-    expect(g.getNextToRemove()).toBe(1);
     g.move(6);
+    expect(g.getRemoved()).toBe(1);
     expect(g.getCell(1)).toBe(null);
 
-    expect(g.getNextToRemove()).toBe(2);
     g.move(3);
+    expect(g.getRemoved()).toBe(2);
     expect(g.getCell(2)).toBe(null);
-    expect(g.getNextToRemove()).toBe(4);
     g.move(2);
+    expect(g.getRemoved()).toBe(null);
     expect(g.isGameOver).toBeTruthy();
     expect(g.getCell(4)).toBe('o'); // doesn't get removed because the win interrupts the clearing
   });
