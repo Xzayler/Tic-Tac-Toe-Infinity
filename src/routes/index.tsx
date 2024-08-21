@@ -20,7 +20,7 @@ export default function Home() {
       </div>
 
       <A
-        href="/game"
+        href="./game"
         class="text-center px-2 py-1 border-4 border-foreground text-foreground rounded-xl hover:bg-foreground hover:text-background transition hover:scale-105"
       >
         Start Game
