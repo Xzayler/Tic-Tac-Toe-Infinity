@@ -74,6 +74,12 @@ export default function GameWrapper() {
             <p class="text-sm text-center">
               {'(You can open a new broser tab to play against yourself)'}
             </p>
+            <button
+              class="text-center px-2 py-1 border-4 border-foreground text-foreground rounded-xl hover:bg-foreground hover:text-background transition"
+              onclick={leaveMatch}
+            >
+              <span class="font-bold">Cancel</span>
+            </button>
             <Show when={showClipAlert()}>
               <ClipAlert />
             </Show>

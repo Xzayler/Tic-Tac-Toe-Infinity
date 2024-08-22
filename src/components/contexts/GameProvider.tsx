@@ -184,7 +184,6 @@ export default function GameProvider(props: { children: JSXElement }) {
 
   function leaveMatch() {
     resetGameState(null);
-    setGameState('matchState', null);
     const req: LeaveReq = { name: 'leave' };
     wsContext.send(JSON.stringify(req));
   }
