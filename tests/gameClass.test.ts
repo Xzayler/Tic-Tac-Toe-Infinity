@@ -117,4 +117,22 @@ describe('Tic-Tac-Toe Game Class', () => {
     expect(g.isGameOver).toBeTruthy();
     expect(g.getCell(4)).toBe('o'); // doesn't get removed because the win interrupts the clearing
   });
+
+  it('Correctly reset the game', () => {
+    g.move(1);
+    g.move(2);
+    g.move(3);
+    g.move(4);
+    g.move(5);
+    expect(g.turns).toBe(5);
+    expect(g.getCell(1)).toBe('x');
+    expect(g.getCell(3)).toBe('x');
+    expect(g.getCell(5)).toBe('x');
+    expect(g.getCell(2)).toBe('o');
+    expect(g.getCell(4)).toBe('o');
+    g.reset();
+    expect(g.turns).toBe(0);
+    expect(g.getRemoved()).toBe(null);
+    expect(g.getCell(1)).toBe(null);
+  });
 });
