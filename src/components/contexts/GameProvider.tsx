@@ -19,6 +19,9 @@ import type {
   RestartReq,
   LeaveReq,
 } from '~/server/ws';
+import FullAlert from '../alerts/FullAlert';
+import NonexistentAlert from '../alerts/NonexistentAlert';
+import { createSign } from 'crypto';
 
 type GameState = {
   id: number;
@@ -93,6 +96,10 @@ export default function GameProvider(props: { children: JSXElement }) {
     if (id) setGameState('id', id);
   }
 
+  const [isFullAlert, setIsFullAlert] = createSignal<boolean>(false);
+  const [isNonexistentAlert, setIsNonexistentAlert] =
+    createSignal<boolean>(false);
+
   function handleJoinResp(resp: JoinResponse) {
     switch (resp.response) {
       case 'o':
@@ -101,12 +108,14 @@ export default function GameProvider(props: { children: JSXElement }) {
         break;
 
       case 'full':
-        // Match is full
+        setIsFullAlert(true);
+        setTimeout(() => setIsFullAlert(false), 2000);
         console.log('match is full');
         break;
 
       case null:
-        // No such match
+        setIsNonexistentAlert(true);
+        setTimeout(() => setIsNonexistentAlert(false), 2000);
         console.log("match doesn't exist");
         break;
 
@@ -214,6 +223,12 @@ export default function GameProvider(props: { children: JSXElement }) {
         }
       >
         {props.children}
+      </Show>
+      <Show when={isFullAlert()}>
+        <FullAlert />
+      </Show>
+      <Show when={isNonexistentAlert()}>
+        <NonexistentAlert />
       </Show>
     </GameContext.Provider>
   );
