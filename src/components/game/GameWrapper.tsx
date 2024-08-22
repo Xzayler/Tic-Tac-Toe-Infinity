@@ -7,7 +7,8 @@ import CopyIcon from '../icons/CopyIcon';
 export default function GameWrapper() {
   let matchIdEl: HTMLInputElement | undefined;
 
-  const { gameState, joinMatch, createMatch } = useGameContext();
+  const { gameState, joinMatch, createMatch, leaveMatch, searchAgain } =
+    useGameContext();
 
   function join() {
     if (
@@ -78,6 +79,23 @@ export default function GameWrapper() {
             </Show>
           </div>
           {/* TODO: Add option to cancel the search */}
+        </Match>
+        <Match when={gameState.matchState === 'left'}>
+          <p class="text-xl text-center">Your opponent left the game</p>
+          <div class="flex flex-wrap justify-center gap-2">
+            <button
+              onclick={leaveMatch}
+              class="text-center px-2 py-1 border-4 border-foreground text-foreground rounded-xl hover:bg-foreground hover:text-background transition"
+            >
+              Back to Menu
+            </button>
+            <button
+              onclick={searchAgain}
+              class="text-center px-2 py-1 border-4 border-foreground text-foreground rounded-xl hover:bg-foreground hover:text-background transition"
+            >
+              Wait for another player
+            </button>
+          </div>
         </Match>
       </Switch>
     </div>

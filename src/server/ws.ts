@@ -45,6 +45,18 @@ type ChatResponse = {
   text: string;
 };
 
+export type LeaveReq = {
+  name: 'leave';
+};
+
+type OpponentLeftResp = {
+  name: 'left';
+};
+
+export type RestartReq = {
+  name: 'restart';
+};
+
 export type MatchState = 'searching' | 'ongoing' | 'left' | 'xw' | 'ow';
 
 type Match = {
@@ -189,10 +201,78 @@ function handleMoveResquest(peer: Peer, req: MoveRequest) {
   peer.send(res);
 }
 
+function cleanUp(peer: Peer) {
+  const matchId = joinedPlayers.get(peer.id);
+  if (matchId === undefined) {
+    return;
+  }
+  joinedPlayers.delete(peer.id);
+  peer.unsubscribe(matchId.toString());
+  const match = matches.get(matchId);
+  if (match === undefined) {
+    matches.delete(matchId);
+    return;
+  }
+
+  let playerSymbol: Player;
+  let opponentSymbol: Player;
+
+  if (match.x === peer) {
+    playerSymbol = 'x';
+    opponentSymbol = 'o';
+  } else if (match.o === peer) {
+    playerSymbol = 'o';
+    opponentSymbol = 'x';
+  } else {
+    return;
+  }
+  match[playerSymbol] = undefined;
+  if (match[opponentSymbol] === undefined) {
+    matches.delete(matchId);
+    return;
+  }
+  match.matchingStatus = 'left';
+  const resp: OpponentLeftResp = {
+    name: 'left',
+  };
+  peer.publish(matchId.toString(), resp);
+}
+
+function restartSearch(peer: Peer) {
+  const matchId = joinedPlayers.get(peer.id);
+  if (matchId === undefined) {
+    joinedPlayers.delete(peer.id);
+    return;
+  }
+
+  const match = matches.get(matchId);
+  if (match === undefined) {
+    joinedPlayers.delete(peer.id);
+    return;
+  }
+
+  // if (match.matchingStatus === 'searching') {
+  //   const resp: JoinResponse = {
+  //     name: 'join',
+  //     matchId: matchId,
+  //     response:
+  //   }
+  // }
+
+  match.game.reset();
+  match.matchingStatus = 'searching';
+  const resp: JoinResponse = {
+    name: 'join',
+    matchId: matchId,
+    response: match.x === peer ? 'x' : 'o',
+  };
+
+  peer.send(resp);
+}
+
 const hooks = defineHooks({
   open(peer) {
     console.log('[ws] open', peer);
-    // peer.send(JSON.stringify('connected'));
   },
 
   message(peer, message) {
@@ -210,12 +290,21 @@ const hooks = defineHooks({
         handleMoveResquest(peer, req);
         break;
 
+      case 'leave':
+        cleanUp(peer);
+        break;
+
+      case 'restart':
+        restartSearch(peer);
+        break;
+
       default:
         break;
     }
   },
 
   close(peer, event) {
+    cleanUp(peer);
     console.log('[ws] close', peer, event);
   },
 

@@ -16,6 +16,8 @@ import type {
   JoinRequest,
   MoveRequest,
   MoveResponse,
+  RestartReq,
+  LeaveReq,
 } from '~/server/ws';
 
 type GameState = {
@@ -32,6 +34,8 @@ type GameContextType = {
   attemptMove: (index: GridIndex) => void;
   joinMatch: (id: number) => void;
   createMatch: () => void;
+  leaveMatch: () => void;
+  searchAgain: () => void;
 };
 
 const GameContext = createContext<GameContextType>();
@@ -76,13 +80,24 @@ export default function GameProvider(props: { children: JSXElement }) {
     id: 0,
   });
 
+  function resetGameState(
+    newState: MatchState | null,
+    id?: number,
+    player?: Player,
+  ) {
+    setGameState('turns', 0);
+    setGameState('activePlayer', 'x');
+    if (player) setGameState('player', player ?? 'x');
+    setGameState('cells', new Array(9).fill(null));
+    setGameState('matchState', newState);
+    if (id) setGameState('id', id);
+  }
+
   function handleJoinResp(resp: JoinResponse) {
     switch (resp.response) {
       case 'o':
       case 'x':
-        setGameState('player', resp.response);
-        setGameState('id', resp.matchId);
-        setGameState('matchState', 'searching');
+        resetGameState('searching', resp.matchId, resp.response);
         break;
 
       case 'full':
@@ -124,6 +139,9 @@ export default function GameProvider(props: { children: JSXElement }) {
       case 'move':
         handleMoveResp(data);
         break;
+      case 'left':
+        setGameState('matchState', 'left');
+        break;
 
       default:
         break;
@@ -164,11 +182,26 @@ export default function GameProvider(props: { children: JSXElement }) {
     wsContext.send(JSON.stringify(req));
   }
 
+  function leaveMatch() {
+    resetGameState(null);
+    setGameState('matchState', null);
+    const req: LeaveReq = { name: 'leave' };
+    wsContext.send(JSON.stringify(req));
+  }
+
+  function searchAgain() {
+    resetGameState('searching');
+    const req: RestartReq = { name: 'restart' };
+    wsContext.send(JSON.stringify(req));
+  }
+
   const contextVal = {
     gameState,
     createMatch,
     joinMatch,
     attemptMove,
+    leaveMatch,
+    searchAgain,
   };
 
   return (
