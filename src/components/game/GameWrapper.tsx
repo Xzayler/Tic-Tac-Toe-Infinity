@@ -1,8 +1,9 @@
 import { useGameContext } from '../contexts/GameProvider';
-import { Switch, Match, Show, createEffect, createSignal } from 'solid-js';
+import { Switch, Match, Show, createSignal } from 'solid-js';
 import Game from './Game';
 import ClipAlert from '../alerts/ClipAlert';
 import CopyIcon from '../icons/CopyIcon';
+import InputAlert from '../alerts/InputAlert';
 
 export default function GameWrapper() {
   let matchIdEl: HTMLInputElement | undefined;
@@ -10,12 +11,18 @@ export default function GameWrapper() {
   const { gameState, joinMatch, createMatch, leaveMatch, searchAgain } =
     useGameContext();
 
+  const [isInvalidInput, setIsInvalidInput] = createSignal<boolean>(false);
+
   function join() {
     if (
       matchIdEl === undefined ||
-      (matchIdEl as HTMLInputElement).value.length == 0
-    )
+      (matchIdEl as HTMLInputElement).value.length == 0 ||
+      !/^\d+$/.test((matchIdEl as HTMLInputElement).value)
+    ) {
+      setIsInvalidInput(true);
+      setTimeout(() => setIsInvalidInput(false), 2000);
       return;
+    }
     joinMatch(Number(matchIdEl.value));
   }
 
@@ -49,6 +56,9 @@ export default function GameWrapper() {
               </button>
             </div>
           </div>
+          <Show when={isInvalidInput()}>
+            <InputAlert />
+          </Show>
         </Match>
         <Match when={gameState.matchState === 'searching'}>
           <div class="flex flex-col gap-1 items-center text-center">
