@@ -12,24 +12,33 @@ export default function LocalPlay() {
           <Match when={gameState.matchState === 'ongoing'}>
             <p
               class={
-                gameState.activePlayer === 'x' ? 'text-cross' : 'text-circle'
+                'text-center ' +
+                (gameState.activePlayer === 'x' ? 'text-cross' : 'text-circle')
               }
             >
-              {gameState.activePlayer.toUpperCase() + "'s turn"}
+              {gameState.activePlayer === gameState.player
+                ? 'Your turn'
+                : "Opponent's turn"}
             </p>
           </Match>
           <Match when={gameState.matchState === 'ow'}>
-            <p class="text-circle">O WON!</p>
+            <p class="text-center text-circle">{`${
+              gameState.player === 'o' ? 'You' : 'Opponent'
+            } won!`}</p>
           </Match>
           <Match when={gameState.matchState === 'xw'}>
-            <p class="text-cross">X WON!</p>
+            <p class="text-center text-cross">{`${
+              gameState.player === 'x' ? 'You' : 'Opponent'
+            } won!`}</p>
           </Match>
           <Match when={gameState.matchState === 'left'}>
-            <p class="text-foreground">Your opponent has left the game</p>
+            <p class="text-center text-foreground">
+              Your opponent has left the game
+            </p>
           </Match>
         </Switch>
       </div>
-      <div class="max-w-xl w-full max-h-[90dvh] aspect-square p-4 bg-highlight rounded-2xl">
+      <div class="max-w-xl w-full max-h-[90dvh] aspect-square p-4">
         <Grid />
       </div>
     </>
