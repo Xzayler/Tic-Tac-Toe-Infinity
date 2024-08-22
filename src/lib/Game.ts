@@ -22,6 +22,26 @@ export default class Game {
     this.toRemove.enqueue(null);
   }
 
+  public resetCells() {
+    this.cells = new Array(9).fill(null);
+  }
+
+  public reset() {
+    this.turns = 0;
+    this.resetCells();
+    this.currPlayer = 'x';
+    this.isGameOver = false;
+    this.toRemove = new Queue(9);
+    this.removed = null;
+    // Fill it with nulls to delay when real cells start being cleared
+    this.toRemove.enqueue(null);
+    this.toRemove.enqueue(null);
+    this.toRemove.enqueue(null);
+    this.toRemove.enqueue(null);
+    this.toRemove.enqueue(null);
+    this.toRemove.enqueue(null);
+  }
+
   public getCurrPlayer(): Player {
     return this.currPlayer;
   }
@@ -96,10 +116,6 @@ export default class Game {
       this.currPlayer = 'x';
     }
     return true;
-  }
-
-  public resetCells() {
-    this.cells = new Array(9).fill(null);
   }
 
   public getRemoved() {
